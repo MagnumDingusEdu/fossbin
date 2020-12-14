@@ -25,6 +25,8 @@ const (
 	listenAddr       = 8086          // files / interface port
 	applicationTitle = "FoSSBin"
 	theme            = "github-gist"
+	username         = "magnum"
+	password         = "password"
 )
 
 // db entry types
@@ -148,8 +150,13 @@ func main() {
 	// set the multipart limit
 	router.MaxMultipartMemory = uploadLimit << 20 // 25 MiB is default
 
+	// handle authentication
+	authorized := router.Group("/", gin.BasicAuth(gin.Accounts{
+		username: password,
+	}))
+
 	// handle uploading files to the server
-	router.POST("/upload", func(c *gin.Context) {
+	authorized.POST("/upload", func(c *gin.Context) {
 		// Multipart form
 		form, _ := c.MultipartForm()
 
@@ -182,7 +189,7 @@ func main() {
 	})
 
 	// handle creation of short links
-	router.POST("/link", func(c *gin.Context) {
+	authorized.POST("/link", func(c *gin.Context) {
 
 		// get long url from post parameters
 		var par linkCreateParams
@@ -208,7 +215,7 @@ func main() {
 	})
 
 	// handle uploading of paste data
-	router.POST("/paste", func(c *gin.Context) {
+	authorized.POST("/paste", func(c *gin.Context) {
 
 		// get long url from post parameters
 		var par pasteCreateParams
@@ -318,7 +325,7 @@ func main() {
 	router.Use(static.Serve("/static", static.LocalFile("./static", false)))
 
 	// application root handler
-	router.GET("/", func(c *gin.Context) {
+	authorized.GET("/", func(c *gin.Context) {
 		c.File(filepath.FromSlash("static/index.html"))
 		return
 	})
