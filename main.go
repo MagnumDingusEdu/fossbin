@@ -325,14 +325,14 @@ func main() {
 	router.Use(static.Serve("/static", static.LocalFile("./static", false)))
 
 	// application root handler
-	authorized.GET("/", func(c *gin.Context) {
+	router.GET("/", func(c *gin.Context) {
 		c.File(filepath.FromSlash("static/index.html"))
 		return
 	})
 
 	// start the server
 	err := router.Run(fmt.Sprintf(":%v", listenAddr))
-
+    fmt.Println("%s", "Server is started and listening.")
 	if err != nil {
 		panic("Unable to start server")
 	}
